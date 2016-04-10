@@ -1,4 +1,4 @@
-Daily Fantasy Score Predictor
+# Daily Fantasy Score Predictor
 
 
 Daily Fantasy is a huge emerging market that imbues the sports world with statistics and gaming. With FanDuel's 275 million dollar Series E and DraftKings 300 million dollar Series D, the two startups have crossed the defining valuation of one billion dollars a piece.
