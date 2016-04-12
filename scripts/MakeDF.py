@@ -9,41 +9,40 @@ def create_csvs(folder):
 	OUTPUT: None
 	goes through each folder. initiates file if it doesn't exist. if it does, append 
 	'''
+	path = folder+'/*/'
+	allFiles = glob.glob(path + "/*.csv")
+	for file in allFiles:
+		write_to_csv(file)
 	return None
 
-def create_df(folder):
+def write_to_csv(in_file):
+	with open(in_file, 'r') as r:
+		text = r.readlines()
+		beginning = in_file.split('/')[0]
+		end = in_file.split('/')[2]
+		composite_file = beginning + '/alldata/' + end
+	with open(composite_file, 'a+') as f:
+		for i in text:
+			f.write(i)
+	return None
+
+def create_df():
 	'''
 	INPUT: folder where all the combined files are
 	OUTPUT: df
 	Goes through each file and adds it to the data frame
 	'''
-	path = '..alldata/alldata'
+	path = 'alldata/alldata'
 	allFiles = glob.glob(path + "/*.csv")
 	list_ = []
 	for file_ in allFiles:
 	    df = pd.read_csv(file_,index_col=None, header=None)
 	    list_.append(df)
 	df = pd.concat(list_)
-	df = df.reset_index()
-	df.columns = ['index','Player Name','MP','FG','FGA','FG%','3P','3PA','3P%','FT','FTA','FT%',\
+	df.columns = ['Player Name','MP','FG','FGA','FG%','3P','3PA','3P%','FT','FTA','FT%',\
 				'ORB','DRB','TRB','AST','STL','BLK','TOV','PF','PTS','+/-','TS%','eFG%','3PAr',\
 				'FTr','ORB%','DRB%','TRB%','AST%','STL%','BLK%','TOV%','USG%','ORtg','DRtg','Away',\
 				'Home','OneisHome','Date']
-	return df
-
-def add_features(df):
-	'''
-	INPUT: raw df
-	OUTPUT: featured df
-	Goes through each file and adds it to the data frame
-	'''
-	df['Suspended'] = df['MP'].apply(lambda x: 1 if x=="Player Suspended" else 0)
-	df['MP'] = df['MP'].apply(lambda x: 0:00 if x=="Did Not Play" or x=="Player Suspended" else x)
-	df['MP1']=pd.to_datetime(df.MP, format = "%M:%S")
-	ms_split = df['MP'].apply(lambda x: x.split(":"))
-	ms_split = df['MP'].apply(lambda x: x.split(":"))
-	df['SP'] = seconds_played
-	df = df.drop(['index', 'MP1', 'MP'], axis=1)
 	return df
 
 def clean_df(df):
@@ -51,8 +50,10 @@ def clean_df(df):
 	INPUT: messy data frame
 	OUTPUT: data frame filling NA, without reserves, and columns typecasted correctly
 	'''
-	df = df.fillna(0)
 	df = df[df['Player Name']!= 'Reserves']
+	df['MP'] = df['MP'].map(lambda x: '0:00' if ":" not in str(x) else str(x))
+	#df['MP'] = df['MP'].apply(lambda x: '0:00' if x=="Did Not Play" or x=="Player Suspended" else x)
+	df = df.fillna(0)
 	df['FG']=(np.array(df['FG'])).astype(int)
 	df['FGA']=(np.array(df['FGA'])).astype(int)
 	df['3P']=(np.array(df['3P'])).astype(int)
@@ -72,40 +73,95 @@ def clean_df(df):
 	df['Date']=pd.to_datetime(df['Date'])
 	return df
 
+def add_features(df):
+	'''
+	INPUT: raw df
+	OUTPUT: featured df
+	Goes through each file and adds it to the data frame
+	'''
+	#df['Suspended'] = df['MP'].apply(lambda x: 1 if x=="Player Suspended" else 0)
+	#df['MP1'] = pd.to_datetime(df.MP, format = "%M:%S")
+	ms_split = df['MP'].apply(lambda x: x.split(":"))
+	seconds_played = [int(row[0])*60 + int(row[1]) for row in ms_split]
+	df['SP'] = seconds_played
+	df = df.reset_index()
+	df = df.drop(['index', 'MP'], axis=1)
+	return df
+
 def make_averages(df):
 	'''
-	INPUT: messy data frame
+	INPUT: messy data frame. use with X_Train
 	OUTPUT: data frame with player averages
 	'''	
 	Player_Averages = df.groupby(df['Player Name']).mean()[['SP', '3P', 'FG', 'FT', 'TRB', \
-																	'AST', 'BLK', 'STL', 'TOV']]
+															'AST', 'BLK', 'STL', 'TOV']]
 	Player_Averages['Score'] = 2*Player_Averages['FG'] + Player_Averages['3P'] + Player_Averages['FT'] \
-                            + 1.2*Player_Averages['TRB'] + 1.5*Player_Averages['AST'] + 2*\
+							+ 1.2*Player_Averages['TRB'] + 1.5*Player_Averages['AST'] + 2*\
                             Player_Averages['BLK'] + 2*Player_Averages['STL'] - Player_Averages['TOV']
-    return Player_Averages
+	return Player_Averages
 
-def previous_stat(index, matrix=tp_matrix, lag=1, column='3P', Player_Averages):
-    player = matrix[index][0]
-    stat = matrix[index][1]
-    index -= lag
-    if index >= 0:
-        if matrix[index][0] == player:
-            statlag = matrix[index][1]
-            return statlag
-        else:
-            return Player_Averages.loc[player, column]
-    else:
-        return Player_Averages.loc[player, column]
+def get_date_matrix(df):
+	'''
+	INPUT: data frame
+	OUTPUT: matrix with player name, dates with lag and seconds played
 
-def make_stat_lists(min_lag=1, max_lag=4, matrix=tp_matrix, column='3P'):
-    listoflist = [[] for i in xrange(max_lag-min_lag+1)]
-    for num, lst in enumerate(listoflist):
-        for i in xrange(len(matrix)):
-            lst.append(previous_stat(i, matrix, lag=num+1, column=column))
-    return listoflist
+	This function and the next three are used to get the seconds played for previous days, indicating
+	representing amount of rest.
+	'''	
+	df['DateM1'] = df['Date'] - pd.DateOffset(1)
+	df['DateM2'] = df['Date'] - pd.DateOffset(2)
+	df['DateM3'] = df['Date'] - pd.DateOffset(3)
+	df['DateM4'] = df['Date'] - pd.DateOffset(4)
+	#df['DateM5'] = df['Date'] - pd.DateOffset(5)
+	date_matrix = df[['Player Name', 'Date', 'DateM1', 'DateM2', 'DateM3', 'DateM4', 'SP']].values
+	return date_matrix
+
+def previous_sp(index, date_matrix, days=1):
+	player = date_matrix[index][0]
+	date = date_matrix[index][1+days]
+	for i in xrange(4):
+		if (index-1-i) >= 0:
+			if date_matrix[index-1-i][0] == player and date_matrix[index-1-i][1] == date:
+				oldsp = date_matrix[index-1-i][-1]
+				return oldsp
+		else:
+			return 0
+	return 0
+
+def make_lists(date_matrix, min_lag=1, max_lag=4):
+	listofsp = [[] for i in xrange(min_lag, max_lag+1)]
+	for num, lst in enumerate(listofsp):
+		for i in xrange(len(date_matrix)):
+			lst.append(previous_sp(i, date_matrix, num+1))
+	return listofsp
+
+def addcolumns(listofsp, df):
+	for num, lst in enumerate(listofsp):
+		df['SP_'+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
+	return None
+
+def previous_stat(index, Player_Averages, matrix, column, lag=1):
+	player = matrix[index][0]
+	stat = matrix[index][1]
+	index -= lag
+	if index >= 0:
+		if matrix[index][0] == player:
+			statlag = matrix[index][1]
+			return statlag
+		else:
+			return Player_Averages.loc[player, column]
+	else:
+		return Player_Averages.loc[player, column]
+
+def make_stat_lists(Player_Averages, matrix, column, min_lag=1, max_lag=4):
+	listoflist = [[] for i in xrange(max_lag-min_lag+1)]
+	for num, lst in enumerate(listoflist):
+		for i in xrange(len(matrix)):
+			lst.append(previous_stat(i, Player_Averages, matrix, column=column, lag=num+1))
+	return listoflist
 
 #dfno0
-def add_slag_columns(listoflist, df, name='TP'):
-    for num, lst in enumerate(listoflist):
-        df[name+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
-    return None
+def add_slag_columns(listoflist, df, name):
+	for num, lst in enumerate(listoflist):
+		df[name+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
+	return None
