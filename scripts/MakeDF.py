@@ -88,17 +88,33 @@ def add_features(df):
 	df = df.drop(['index', 'MP'], axis=1)
 	return df
 
-def make_averages(df):
+def make_averages(df, cutoff=0):
 	'''
-	INPUT: messy data frame. use with X_Train
+	make_averages_until
+	INPUT: messy data frame. use with X_Train. Input how many days you want to have the averages cutoff
 	OUTPUT: data frame with player averages
-	'''	
+	'''
+	today = datetime.date.today()
+	stop_average_date = today - datetime.timedelta(cutoff)
+	df = df[df['Date'] < stop_average_date]
 	Player_Averages = df.groupby(df['Player Name']).mean()[['SP', '3P', 'FG', 'FT', 'TRB', \
 															'AST', 'BLK', 'STL', 'TOV']]
 	Player_Averages['Score'] = 2*Player_Averages['FG'] + Player_Averages['3P'] + Player_Averages['FT'] \
 							+ 1.2*Player_Averages['TRB'] + 1.5*Player_Averages['AST'] + 2*\
                             Player_Averages['BLK'] + 2*Player_Averages['STL'] - Player_Averages['TOV']
 	return Player_Averages
+
+def getdf_untildate(df, cutoff=0):
+	'''
+	INPUT: data frame
+	OUTPUT: data frame up until date
+	would be wise to match cutoff with make_averages cutoff to feed to clusters later
+	'''
+	today = datetime.date.today()
+	stop_average_date = today - datetime.timedelta(cutoff)
+	df = df[df['Date'] < stop_average_date]
+	df = df[['Player Name','SP','3P','FG','FT','TRB','AST','BLK','STL','TOV']]
+	return df
 
 def get_date_matrix(df):
 	'''
