@@ -1,15 +1,8 @@
 import pandas as pd
+import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-
-
-def kmeanscluster_ready(eigenvector, player_average):
-	'''
-	input second item
-	Input: Player_average with cutoff date to determine clusters
-	Output: 2p X n matrix to feed to kmeans
-	'''
-	return None
+from collections import defaultdict
 
 def get_player_list(df):
 	'''
@@ -18,12 +11,12 @@ def get_player_list(df):
 	'''
 	return df['Player Name'].unique()
 
-def get_individual_df(name):
+def get_individual_df(name, df):
 	'''
-	Input: name
+	Input: name, df
 	Output: get data frame of player
 	'''
-	return df['Player Name'] == name
+	return df[df['Player Name'] == name]
 
 def individual_to_pca(df):
 	'''
@@ -36,34 +29,87 @@ def individual_to_pca(df):
 	pca_nomnom = df_to_use[['FG','FG','3P','TRB', 'AST', 'STL', 'BLK', 'TOV']]
 	return pca_nomnom
 
+def get_lst_pca(df):
+	'''
+	Input: df
+	Output: list of pca
+	'''
+	pca_lst = []
+	players = get_player_list(df)
+	for player in players:
+		pca_lst.append((player, individual_to_pca(get_individual_df(player, df))))
+	return pca_lst
+
 def run_pca(df):
 	'''
 	Input: data frame (pca_nomnom)
 	Output: pca matrix and eigenvectors
 	'''
-    pca              = PCA(n_components=8, whiten=True)
-    pca.fit(df)
-    top95percent_PC  = get_95_var(pca.explained_variance_ratio_)
-    pca.n_components = top95percent_PC
-    X_reduced        = pca.fit_transform(df)
-    PCA_matrix       = pd.DataFrame(X_reduced)
-    return(PCA_matrix, pca.components_)
+	pca              = PCA(n_components=8, whiten=True)
+	pca.fit(df)
+	top95percent_PC  = get_95_var(pca.explained_variance_ratio_)
+	pca.n_components = top95percent_PC
+	X_reduced        = pca.fit_transform(df)
+	PCA_matrix       = pd.DataFrame(X_reduced)
+	return(PCA_matrix, pca.components_)
+
+def kmeanscluster_ready(pca_lst, player_average):
+	'''
+	input second item
+	Input: Player_average with cutoff date to determine clusters
+	Output: 2p X n ndarray to feed to kmeans
+	'''
+	aray = np.zeros((len(pca_lst), 17))
+	# print lst.shape
+	# print lst[0]
+	PA = player_average.reset_index()
+	for i, (player, df) in enumerate(pca_lst):
+		PCA_matrix, Eigenvectors = run_pca(df)
+		p_avg = PA[PA['Player Name']== player]
+		p = p_avg.iloc[:,1:-1].values
+		kclusterme = np.append(p, Eigenvectors[0])
+		#print player
+		#print kclusterme.shape
+		if kclusterme.shape == (17,):
+			# print player
+			# print kclusterme.shape
+			aray[i] = kclusterme
+ 		#lst.append(kclusterme)
+	return aray
+	#return kclusterme
 
 def get_95_var(array):
 	'''
 	Input: array
 	Output: return eigenvectors up untl PCA explains .95+ of variance
 	'''
-    total = 0
-    pos = 0
-    for x in array:
-        total += x
-        pos   += 1
-        print pos-1, total
-        if total>=0.95:
-            #print total
-            return(pos)
+	total = 0
+	pos = 0
+	for x in array:
+		total += x
+		pos   += 1
+		#print pos-1, total
+		if total>=0.95:
+			#print total
+			return(pos)
 
+def make_cluster_dictionary(km,PA):
+	'''
+	Input: model, player average
+	Output: dictionary
+	'''
+	cluster_dictionary = {}
+	for cluster, player in zip(km.labels_, PA.index.values):
+		cluster_dictionary[player] = cluster
+	return cluster_dictionary
 
-
+def make_cluster_dictionary2(km,PA):
+	'''
+	Input: model, player average
+	Output: dictionary
+	'''
+	cluster_dictionary = defaultdict(list)
+	for player, cluster in zip(PA.index.values, km.labels_):
+		cluster_dictionary[cluster].append(player)
+	return cluster_dictionary
 
