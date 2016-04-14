@@ -40,15 +40,29 @@ def get_lst_pca(df):
 		pca_lst.append((player, individual_to_pca(get_individual_df(player, df))))
 	return pca_lst
 
+# def run_pca(df):
+# 	'''
+# 	Input: data frame (pca_nomnom)
+# 	Output: pca matrix and eigenvectors
+# 	'''
+# 	pca              = PCA(n_components=8, whiten=True)
+# 	pca.fit(df)
+# 	top95percent_PC  = get_95_var(pca.explained_variance_ratio_)
+# 	pca.n_components = top95percent_PC
+# 	X_reduced        = pca.fit_transform(df)
+# 	PCA_matrix       = pd.DataFrame(X_reduced)
+# 	return(PCA_matrix, pca.components_)
+
 def run_pca(df):
 	'''
 	Input: data frame (pca_nomnom)
 	Output: pca matrix and eigenvectors
 	'''
-	pca              = PCA(n_components=8, whiten=True)
+	pca              = PCA(n_components=3, whiten=True)
 	pca.fit(df)
-	top95percent_PC  = get_95_var(pca.explained_variance_ratio_)
-	pca.n_components = top95percent_PC
+	#top95percent_PC  = get_95_var(pca.explained_variance_ratio_)
+	#pca.n_components = top95percent_PC
+	#print pca.n_components
 	X_reduced        = pca.fit_transform(df)
 	PCA_matrix       = pd.DataFrame(X_reduced)
 	return(PCA_matrix, pca.components_)

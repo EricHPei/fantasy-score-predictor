@@ -90,6 +90,7 @@ def add_features(df):
 
 def make_averages(df, cutoff=0):
 	'''
+	original make_averages
 	make_averages_until
 	INPUT: messy data frame. use with X_Train. Input how many days you want to have the averages cutoff
 	OUTPUT: data frame with player averages
@@ -102,7 +103,20 @@ def make_averages(df, cutoff=0):
 	Player_Averages['Score'] = 2*Player_Averages['FG'] + Player_Averages['3P'] + Player_Averages['FT'] \
 							+ 1.2*Player_Averages['TRB'] + 1.5*Player_Averages['AST'] + 2*\
                             Player_Averages['BLK'] + 2*Player_Averages['STL'] - Player_Averages['TOV']
+	Player_Averages = Player_Averages.dropna(axis=1)
 	return Player_Averages
+
+def make_averages_per48(df):
+	'''
+	make_averages_until
+	INPUT: messy data frame. use with X_Train. Input how many days you want to have the averages cutoff
+	OUTPUT: data frame with player averages
+	'''
+	for column in df.columns[1:-1]:
+		df[column] = 48*60*df[column]/df['SP']
+	df=df.dropna(0)
+	return df.iloc[:,1:-1]
+
 
 def getdf_untildate(df, cutoff=0):
 	'''
