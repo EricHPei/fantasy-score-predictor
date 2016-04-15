@@ -4,6 +4,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 import matplotlib.pyplot
+import datetime
 
 def prepare_for_forest(df):
 	'''
@@ -50,5 +51,19 @@ def crossval_player(player, player_x, player_y, cat=1):
 	X_train, X_test, y_train, y_test = train_test_split(player_x[player_x.columns-['Player Name']], player_y.iloc[:,cat], test_size = 0.25, random_state = 30)
 	return X_train, X_test, y_train, y_test
 
+def date_with_forest(df, cutoff=0):
+	'''
+	Input: Data Frame
+	Output: X and Y Data Frame ready to feed to random forest
+	y_df = predict_df
+	Given my huge data frame, returns a data frame ready for random forest.
+	'''
+	today = datetime.date.today()
+	stop_average_date = today - datetime.timedelta(cutoff)
+	df = df[df['Date'] < stop_average_date]
+	forest_df = df.iloc[:,43:]
+	forest_df[['Player Name','OneisHome','Date']] = df[['Player Name','OneisHome', 'Date']]
+	y_df = df[['Player Name','Date','3P','FG','FT','TRB','AST','BLK','STL','TOV']]
 
+	return forest_df, y_df
 
