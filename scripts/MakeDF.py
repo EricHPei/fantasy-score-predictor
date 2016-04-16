@@ -73,6 +73,9 @@ def clean_df(df):
 	df['Date']=pd.to_datetime(df['Date'])
 	return df
 
+def drop_zerominutes(df):
+	return df[df['MP'] != '0:00']
+
 def add_features(df):
 	'''
 	INPUT: raw df
@@ -99,7 +102,8 @@ def make_averages(df, cutoff=0):
 	stop_average_date = today - datetime.timedelta(cutoff)
 	df = df[df['Date'] < stop_average_date]
 	Player_Averages = df.groupby(df['Player Name']).mean()[['SP', '3P', 'FG', 'FT', 'TRB', \
-															'AST', 'BLK', 'STL', 'TOV']]
+															'AST', 'BLK', 'STL', 'TOV', 'USG%', 'FTr', \
+															'+/-', 'TS%', 'PF', 'ORtg', 'DRtg']]
 	Player_Averages['Score'] = 2*Player_Averages['FG'] + Player_Averages['3P'] + Player_Averages['FT'] \
 							+ 1.2*Player_Averages['TRB'] + 1.5*Player_Averages['AST'] + 2*\
                             Player_Averages['BLK'] + 2*Player_Averages['STL'] - Player_Averages['TOV']
@@ -195,3 +199,19 @@ def add_slag_columns(listoflist, df, name):
 	for num, lst in enumerate(listoflist):
 		df[name+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
 	return None
+
+def player_average_asfeature(df, df2):
+	""" Add the players lifetime averages as a feature
+
+	Parameters
+	----------
+	df: data frame with all information
+	df2: data frame of player averages
+
+	Returns
+	-------
+	dataframe with last X games as new feature
+	"""
+	return None 
+
+

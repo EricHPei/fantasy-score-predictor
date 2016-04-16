@@ -29,8 +29,8 @@ def make_plots(df):
 		ax.set_zlabel('Principal Component 3')
 		name1 = str(est.n_clusters)
 		plt.savefig('score-predictor/img/' + name1 + '.png')
-		for i in np.linspace(45,360,8):
-			ax.view_init(i,0)
-			plt.savefig('score-predictor/img/' + name1 + 'clusters' + str(i) + '.png')
+		# for i in np.linspace(45,360,8):
+		# 	ax.view_init(45-i,0)
+		# 	plt.savefig('score-predictor/img/' + name1 + 'clusters' + str(i) + '.png')
 		fignum = fignum + 1
 	return None
