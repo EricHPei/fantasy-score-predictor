@@ -1,7 +1,9 @@
+from __future__ import division
 import pandas as pd 
 import numpy as np
 import glob
 import datetime
+
 
 def create_csvs(folder):
 	'''
@@ -116,8 +118,10 @@ def make_averages_per48(df):
 	INPUT: messy data frame. use with X_Train. Input how many days you want to have the averages cutoff
 	OUTPUT: data frame with player averages
 	'''
-	for column in df.columns[1:-1]:
+	for column in df.columns[1:8]:
 		df[column] = 48*60*df[column]/df['SP']
+	df['PF'] = 48*60*df['PF']/df['SP']
+	df['+/-'] = 48*60*df['+/-']/df['SP']
 	df=df.dropna(0)
 	return df.iloc[:,1:-1]
 

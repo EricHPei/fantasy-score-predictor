@@ -6,9 +6,10 @@ import numpy as np
 
 
 def make_plots(df):
-	estimators = {'k_means_bball_4': KMeans(n_clusters=4, random_state=30),
-					'k_means_bball_5': KMeans(n_clusters=5, random_state=30),
-					'k_means_bball_6': KMeans(n_clusters=6, random_state=30)}
+	estimators = {'k_means_bball_3': KMeans(n_clusters=3, random_state=30),
+					'k_means_bball_4': KMeans(n_clusters=4, random_state=30),
+					'k_means_bball_5': KMeans(n_clusters=5, random_state=30)}
+					#'k_means_bball_6': KMeans(n_clusters=6, random_state=30)}
 	fignum = 1
 	for name, est in estimators.items():
 		fig = plt.figure(fignum, figsize=(12, 9))
