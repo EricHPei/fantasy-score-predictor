@@ -72,3 +72,22 @@ def crossval_player(player, player_x, player_y, cat=1):
 	X_train, X_test, y_train, y_test = train_test_split(player_x[list(player_x.columns-['Player Name'])], player_y.iloc[:,cat], test_size = 0.25, random_state = 30)
 	return X_train, X_test, y_train, y_test
 
+def make_8_models(df, y):
+	'''Pass in Y, make 8 models'''
+	model_dict = {}
+	#df_fit = df.drop(['Date', 'Player Name'], axis=1)
+	#print df_fit.head()
+	for column in y.columns:
+		model_dict[column] = RandomForestRegressor()
+		#print y[column]
+		model_dict[column].fit(df, y[column])
+	return model_dict
+	# model = RandomForestRegressor()
+	# model.fit(df, y.values)
+	# return model
+
+
+def make_predictions(d, y):
+	''' Pass in dictionary of models and test set'''
+	for cat, model in d.iteritems():
+		model.predict(y[cat])
