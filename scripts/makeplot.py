@@ -5,7 +5,7 @@ import numpy as np
 	
 
 
-def make_plots(df):
+def make_plots(df, filename=''):
 	estimators = {'k_means_bball_3': KMeans(n_clusters=3, random_state=30),
 					'k_means_bball_4': KMeans(n_clusters=4, random_state=30),
 					'k_means_bball_5': KMeans(n_clusters=5, random_state=30)}
@@ -29,7 +29,7 @@ def make_plots(df):
 		ax.set_ylabel('Principal Component 2')
 		ax.set_zlabel('Principal Component 3')
 		name1 = str(est.n_clusters)
-		plt.savefig('score-predictor/img/' + name1 + '.png')
+		plt.savefig('score-predictor/img/' + name1 + filename + '.png')
 		# for i in np.linspace(45,360,8):
 		# 	ax.view_init(45-i,0)
 		# 	plt.savefig('score-predictor/img/' + name1 + 'clusters' + str(i) + '.png')
