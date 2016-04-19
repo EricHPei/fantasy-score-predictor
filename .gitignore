@@ -63,3 +63,6 @@ target/
 
 # Data Folder
 alldata/
+
+# Pickle Folder
+pickles/

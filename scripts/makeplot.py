@@ -6,6 +6,7 @@ import numpy as np
 
 
 def make_plots(df, filename=''):
+	'''Generate different plots for kmeans'''
 	estimators = {'k_means_bball_3': KMeans(n_clusters=3, random_state=30),
 					'k_means_bball_4': KMeans(n_clusters=4, random_state=30),
 					'k_means_bball_5': KMeans(n_clusters=5, random_state=30)}

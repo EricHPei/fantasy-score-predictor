@@ -46,9 +46,6 @@ def individual_forest_df(forest_df, y_df, player):
 	'''	
 	player_x = forest_df[forest_df['Player Name'] == player]	
 	player_y = y_df[y_df['Player Name'] == player]
-	# if 'Date' in player_x.columns:
-	# 	player_x = player_x.ix[:, player_x.columns != 'Date']
-	# 	player_y = player_y.ix[:, player_y.columns != 'Date']
 	return player, player_x, player_y
 
 def crossval_player(player, player_x, player_y, cat=1):
@@ -75,16 +72,11 @@ def crossval_player(player, player_x, player_y, cat=1):
 def make_8_models(df, y):
 	'''Pass in Y, make 8 models'''
 	model_dict = {}
-	#df_fit = df.drop(['Date', 'Player Name'], axis=1)
-	#print df_fit.head()
 	for column in y.columns:
 		model_dict[column] = RandomForestRegressor()
-		#print y[column]
 		model_dict[column].fit(df, y[column])
 	return model_dict
-	# model = RandomForestRegressor()
-	# model.fit(df, y.values)
-	# return model
+
 
 
 def make_predictions(d, y):

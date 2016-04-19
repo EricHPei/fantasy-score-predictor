@@ -54,7 +54,6 @@ def clean_df(df):
 	'''
 	df = df[df['Player Name']!= 'Reserves']
 	df['MP'] = df['MP'].map(lambda x: '0:00' if ":" not in str(x) else str(x))
-	#df['MP'] = df['MP'].apply(lambda x: '0:00' if x=="Did Not Play" or x=="Player Suspended" else x)
 	df = df.fillna(0)
 	df['FG']=(np.array(df['FG'])).astype(int)
 	df['FGA']=(np.array(df['FGA'])).astype(int)
@@ -84,8 +83,6 @@ def add_features(df):
 	OUTPUT: featured df
 	Goes through each file and adds it to the data frame
 	'''
-	#df['Suspended'] = df['MP'].apply(lambda x: 1 if x=="Player Suspended" else 0)
-	#df['MP1'] = pd.to_datetime(df.MP, format = "%M:%S")
 	ms_split = df['MP'].apply(lambda x: x.split(":"))
 	seconds_played = [int(row[0])*60 + int(row[1]) for row in ms_split]
 	df['SP'] = seconds_played

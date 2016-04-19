@@ -40,19 +40,6 @@ def get_lst_pca(df):
 		pca_lst.append((player, individual_to_pca(get_individual_df(player, df))))
 	return pca_lst
 
-# def run_pca(df):
-# 	'''
-# 	Input: data frame (pca_nomnom)
-# 	Output: pca matrix and eigenvectors
-# 	'''
-# 	pca              = PCA(n_components=8, whiten=True)
-# 	pca.fit(df)
-# 	top95percent_PC  = get_95_var(pca.explained_variance_ratio_)
-# 	pca.n_components = top95percent_PC
-# 	X_reduced        = pca.fit_transform(df)
-# 	PCA_matrix       = pd.DataFrame(X_reduced)
-# 	return(PCA_matrix, pca.components_)
-
 def run_pca(df):
 	'''
 	Input: data frame (pca_nomnom)
@@ -60,9 +47,6 @@ def run_pca(df):
 	'''
 	pca              = PCA(n_components=3, whiten=True)
 	pca.fit(df)
-	#top95percent_PC  = get_95_var(pca.explained_variance_ratio_)
-	#pca.n_components = top95percent_PC
-	#print pca.n_components
 	X_reduced        = pca.fit_transform(df)
 	PCA_matrix       = pd.DataFrame(X_reduced)
 	return(PCA_matrix, pca.components_)
@@ -74,23 +58,16 @@ def kmeanscluster_ready(pca_lst, player_average):
 	Output: 2p X n ndarray to feed to kmeans
 	'''
 	aray = np.zeros((len(pca_lst), 17))
-	# print lst.shape
-	# print lst[0]
 	PA = player_average.reset_index()
 	for i, (player, df) in enumerate(pca_lst):
 		PCA_matrix, Eigenvectors = run_pca(df)
 		p_avg = PA[PA['Player Name']== player]
 		p = p_avg.iloc[:,1:-1].values
 		kclusterme = np.append(p, Eigenvectors[0])
-		#print player
-		#print kclusterme.shape
 		if kclusterme.shape == (17,):
-			# print player
-			# print kclusterme.shape
 			aray[i] = kclusterme
- 		#lst.append(kclusterme)
 	return aray
-	#return kclusterme
+
 
 def get_95_var(array):
 	'''
@@ -102,9 +79,7 @@ def get_95_var(array):
 	for x in array:
 		total += x
 		pos   += 1
-		#print pos-1, total
 		if total>=0.95:
-			#print total
 			return(pos)
 
 def make_cluster_dictionary(km,PA):
