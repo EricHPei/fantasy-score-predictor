@@ -108,7 +108,7 @@ def make_averages(df, cutoff=0):
 															'+/-', 'TS%', 'PF', 'ORtg', 'DRtg']]
 	Player_Averages['Score'] = 2*Player_Averages['FG'] + Player_Averages['3P'] + Player_Averages['FT'] \
 							+ 1.2*Player_Averages['TRB'] + 1.5*Player_Averages['AST'] + 2*\
-                            Player_Averages['BLK'] + 2*Player_Averages['STL'] - Player_Averages['TOV']
+							Player_Averages['BLK'] + 2*Player_Averages['STL'] - Player_Averages['TOV']
 	Player_Averages = Player_Averages.dropna(axis=1)
 	return Player_Averages
 
@@ -198,7 +198,7 @@ def make_stat_lists(Player_Averages, matrix, column, min_lag=1, max_lag=4):
 			lst.append(previous_stat(i, Player_Averages, matrix, column=column, lag=num+1))
 	return listoflist
 
-#dfno0
+
 def add_slag_columns(listoflist, df, name):
 	for num, lst in enumerate(listoflist):
 		df[name+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)

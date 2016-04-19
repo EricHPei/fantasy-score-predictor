@@ -6,6 +6,7 @@ import datetime
 import pandas as pd
 
 def something(df, cluster_dict, cluster_num=2, cutoff=0):
+	'''Pass in data frame, dictionary of clusters, cluster number and return predicted scores and true scores'''
 	today = datetime.date.today()
 	stop_average_date = today - datetime.timedelta(cutoff)
 	df_x, df_y = RandomForest.date_with_forest(df, remove_date=False)

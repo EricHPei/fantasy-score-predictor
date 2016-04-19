@@ -25,28 +25,28 @@ for url in game_url:
 
 responses = [requests.get(game_url) for game_url in game_urls]
 
-class foofoo():
+# class foofoo():
 
-    def __init__(self):
-        response = requests.get(game_urls[0])
-        soup = BeautifulSoup(response.content, 'lxml')
-        self.stats = soup.select('table[id$="_basic"] tbody tr')
-        self.advanced = soup.select('table[id$="_advanced"] tbody tr')
+#     def __init__(self):
+#         response = requests.get(game_urls[0])
+#         soup = BeautifulSoup(response.content, 'lxml')
+#         self.stats = soup.select('table[id$="_basic"] tbody tr')
+#         self.advanced = soup.select('table[id$="_advanced"] tbody tr')
 
-    def get_name(stats, i):
-    	name = '_'.join(str(stats[i].get_text().split('\n')[1:-1][0]).split(' '))
-    	return name
+#     def get_name(stats, i):
+#     	name = '_'.join(str(stats[i].get_text().split('\n')[1:-1][0]).split(' '))
+#     	return name
 
-    def get_line(stats, advanced, i):
-		line = stats[i].get_text().split('\n')[1:-1]
-		line2 = advanced[i].get_text().split('\n')[3:-1]
-		line = line + line2
-		return line
+#     def get_line(stats, advanced, i):
+# 		line = stats[i].get_text().split('\n')[1:-1]
+# 		line2 = advanced[i].get_text().split('\n')[3:-1]
+# 		line = line + line2
+# 		return line
 
-	def create_csv(player_game_stat, out_file):
-	    file = open(out_file, 'w+')
-	    file.write(','.join(player_game_stat))
-	    return None
+# 	def create_csv(player_game_stat, out_file):
+# 	    file = open(out_file, 'w+')
+# 	    file.write(','.join(player_game_stat))
+# 	    return None
 
 
 
