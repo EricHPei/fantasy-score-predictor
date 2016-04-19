@@ -24,12 +24,7 @@ def data_page():
 @app.route('/my_picks')
 def mypicks_page():
     return render_template('my_picks.html')
-    #'''
-    #    <form action="/word_counter" method='POST' >
-    #        <input type="text" name="user_input" />
-    #        <input type="submit" />
-    #    </form>
-    #    '''
+
 
 
 
