@@ -65,4 +65,4 @@ target/
 alldata/
 
 # Pickle Folder
-pickles/
+score-predictor/pickles/
