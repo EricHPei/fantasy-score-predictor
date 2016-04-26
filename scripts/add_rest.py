@@ -19,4 +19,4 @@ def addcolumns(listofsp):
         df['SP_'+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
 
 if __name__ == '__main__':
-	addcolumns(make_lists(listofsp))
+	addcolumns(make_lists())
