@@ -10,9 +10,9 @@ plt.style.use('ggplot')
 def get_silhouette_score(X,nclust):
     '''
     calculate average silhouette score
-    :param nclust: int, number of clusters
-    :param X: numpy array, data set to cluster
-    :return: float, average silhouette score
+    @param nclust: int, number of clusters
+    @param X: numpy array, data set to cluster
+    @return sil_avg: float, average silhouette score
     '''
     km = KMeans(nclust, random_state=30)
     km.fit(X)
@@ -22,9 +22,9 @@ def get_silhouette_score(X,nclust):
 def plot_silhouette(X,nrange):
     '''
     plot average silhouette score against the number of clusters
-    :param nrange: int, indicates range of cluster numbers
-    :param X: numpy array, data set to cluster
-    :raise: plot
+    @param nrange: int, indicates range of cluster numbers
+    @param X: numpy array, data set to cluster
+    @return: plot
     '''
     sil_scores = [get_silhouette_score(X,i) for i in xrange(2,nrange)]
     plt.plot(range(2,nrange), sil_scores)
@@ -35,9 +35,9 @@ def plot_silhouette(X,nrange):
 def cluster_plot(X,n_clusters):
     '''
     plot silhouette and clusters
-    :param x: numpy array
-    :param nrange: int, range of cluster numbers
-    :return: plots
+    @param x: numpy array
+    @param n_clusters: int, range of cluster numbers
+    @return: plots
     '''
 
     # Create a subplot with 1 row and 2 columns

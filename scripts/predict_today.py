@@ -12,8 +12,13 @@ import re
 
 
 def get_url_today_teams():
-	'''Todays Games are encoded differently on Basketball Reference. Use this function
-	to return the urls of the teams that are playing today'''
+	'''
+	Todays Games are encoded differently on Basketball Reference. Use this function
+	to return the urls of the teams that are playing today
+
+	@return away_urls: returns a list of URLs of the teams playing today away from home
+	@return home_urls: returns a list of URLs of the teams playing today at home
+	'''
 	url = 'http://www.basketball-reference.com/leagues/NBA_2016_games.html'
 	base_url = 'http://www.basketball-reference.com'
 	response = requests.get(url)
@@ -30,7 +35,16 @@ def get_url_today_teams():
 	return away_urls, home_urls
 
 def get_list_of_players_today(away_urls, home_urls):
-	'''Get list of team urls and return list of players'''
+	'''
+	Get list of team urls and return list of players
+
+	@param away_urls: list of urls of teams that are playing today away from home
+	@param home_urls: list of urls of teams that are playing today at home
+	@return away_list: list of tuples of players playing away from home today. 1st element name, 
+						2nd element location.
+	@return home_list: list of tuples of players playing at home today. 1st element name, 2nd 
+						element location.
+	'''
 	away_list = []
 	home_list = []
 	compilation = zip(away_urls, home_urls)
@@ -53,7 +67,18 @@ def get_list_of_players_today(away_urls, home_urls):
 	return away_list, home_list
 
 def create_line(df, away_list, home_list):
-	'''Feed list of tuples with Player Name and place playing, output line to feed to predict'''
+	'''
+	Feed list of tuples with Player Name and place playing, output line to feed to predict
+
+	@param df: pandas data frame of most recent stats
+	@param away_list: list of tuples of players playing away from home today. 1st element name,
+						2ndelement location.
+	@param home_list: list of tuples of players playing at home today. 1st element name, 2nd
+						element location.
+	@return player_dict: dictionary of players where keyword is player name and value is a nested
+						dictionary where keyword is stat name and value is the predicted value
+						of the stat today.
+	'''
 	col = df.columns
 	elev = read_to_dict()
 	today = datetime.date.today()
@@ -167,22 +192,26 @@ def predict_now(lines):
 		model0_d=pickle.load(fp)
 		model1_d=pickle.load(fp)
 		model2_d=pickle.load(fp)
-	#my_cols = list(lines.drop(['Date', 'Player Name'], axis=1).columns)
 	col_id = []
-	feature_names = ['SP_1dayago', 'SP_2dayago', 'SP_3dayago', 'SP_4dayago', 'TP1dayago', 'TP2dayago', 'TP3dayago', 'TP4dayago', 
-		'FG1dayago', 'FG2dayago', 'FG3dayago', 'FG4dayago', 'FT1dayago', 'FT2dayago', 'FT3dayago', 'FT4dayago', 'TRB1dayago', 'TRB2dayago', 'TRB3dayago', 
-		'TRB4dayago', 'AST1dayago', 'AST2dayago', 'AST3dayago', 'AST4dayago', 'BLK1dayago', 'BLK2dayago', 'BLK3dayago', 'BLK4dayago', 'STL1dayago', 
-		'STL2dayago', 'STL3dayago', 'STL4dayago', 'TOV1dayago', 'TOV2dayago', 'TOV3dayago', 'TOV4dayago', 'USGP1dayago', 'USGP2dayago', 'USGP3dayago', 
-		'USGP4dayago', 'FTr1dayago', 'FTr2dayago', 'FTr3dayago', 'FTr4dayago', 'PM1dayago', 'PM2dayago', 'PM3dayago', 'PM4dayago', 'TSP1dayago', 'TSP2dayago', 
-		'TSP3dayago', 'TSP4dayago', 'PF1dayago', 'PF2dayago', 'PF3dayago', 'PF4dayago', 'ORtg1dayago', 'ORtg2dayago', 'ORtg3dayago', 'ORtg4dayago', 'DRtg1dayago', 
-		'DRtg2dayago', 'DRtg3dayago', 'DRtg4dayago', 'Elevation', 'OneisHome']
+	feature_names = ['SP_1dayago', 'SP_2dayago', 'SP_3dayago', 'SP_4dayago', 'TP1dayago', 
+					'TP2dayago', 'TP3dayago', 'TP4dayago', 'FG1dayago', 'FG2dayago', 
+					'FG3dayago', 'FG4dayago', 'FT1dayago', 'FT2dayago', 'FT3dayago', 
+					'FT4dayago', 'TRB1dayago', 'TRB2dayago', 'TRB3dayago', 'TRB4dayago', 
+					'AST1dayago', 'AST2dayago', 'AST3dayago', 'AST4dayago', 'BLK1dayago', 
+					'BLK2dayago', 'BLK3dayago', 'BLK4dayago', 'STL1dayago', 'STL2dayago', 
+					'STL3dayago', 'STL4dayago', 'TOV1dayago', 'TOV2dayago', 'TOV3dayago', 
+					'TOV4dayago', 'USGP1dayago', 'USGP2dayago', 'USGP3dayago', 'USGP4dayago', 
+					'FTr1dayago', 'FTr2dayago', 'FTr3dayago', 'FTr4dayago', 'PM1dayago', 
+					'PM2dayago', 'PM3dayago', 'PM4dayago', 'TSP1dayago', 'TSP2dayago', 
+					'TSP3dayago', 'TSP4dayago', 'PF1dayago', 'PF2dayago', 'PF3dayago', 
+					'PF4dayago', 'ORtg1dayago', 'ORtg2dayago', 'ORtg3dayago', 'ORtg4dayago', 
+					'DRtg1dayago', 'DRtg2dayago', 'DRtg3dayago', 'DRtg4dayago', 'Elevation', 
+					'OneisHome']
 	for feat in feature_names:
 		col_id.append(np.where(lines.columns==feat)[0][0])
 	for i, line in enumerate(lines.values):
 		player = line[np.where(lines.columns=='Player Name')[0][0]]
 		features = line[col_id].reshape(1, -1)
-		#features = lines.iloc[i][['SP_1dayago', 'SP_2dayago', 'SP_3dayago', 'SP_4dayago', 'TP1dayago', 'TP2dayago', 'TP3dayago', 'TP4dayago', 'FG1dayago', 'FG2dayago', 'FG3dayago', 'FG4dayago', 'FT1dayago', 'FT2dayago', 'FT3dayago', 'FT4dayago', 'TRB1dayago', 'TRB2dayago', 'TRB3dayago', 'TRB4dayago', 'AST1dayago', 'AST2dayago', 'AST3dayago', 'AST4dayago', 'BLK1dayago', 'BLK2dayago', 'BLK3dayago', 'BLK4dayago', 'STL1dayago', 'STL2dayago', 'STL3dayago', 'STL4dayago', 'TOV1dayago', 'TOV2dayago', 'TOV3dayago', 'TOV4dayago', 'USGP1dayago', 'USGP2dayago', 'USGP3dayago', 'USGP4dayago', 'FTr1dayago', 'FTr2dayago', 'FTr3dayago', 'FTr4dayago', 'PM1dayago', 'PM2dayago', 'PM3dayago', 'PM4dayago', 'TSP1dayago', 'TSP2dayago', 'TSP3dayago', 'TSP4dayago', 'PF1dayago', 'PF2dayago', 'PF3dayago', 'PF4dayago', 'ORtg1dayago', 'ORtg2dayago', 'ORtg3dayago', 'ORtg4dayago', 'DRtg1dayago', 'DRtg2dayago', 'DRtg3dayago', 'DRtg4dayago', 'Elevation', 'OneisHome']]
-		#double check if its first element
 		print player
 		if player in cl_di[0]:
 			print 'cluster 0:'
@@ -200,14 +229,19 @@ def predict_now(lines):
 			print player + ' is a ninja' 
 
 def predict_today(player_dict):
-	'''Take a dictionary of values to predict and predict'''
+	'''
+	Take a dictionary of values to predict and prints predictions
+
+	@param player_dict: dictionary of players where keyword is player name and value is a nested
+						dictionary where keyword is stat name and value is the predicted value
+						of the stat today.
+	'''
 	filename = 'score-predictor/pickles/cluster_pickles_with_dictionary.r'
 	with open(filename,'rb') as fp:
 		cl_di=pickle.load(fp)
 		model0_d=pickle.load(fp)
 		model1_d=pickle.load(fp)
 		model2_d=pickle.load(fp)
-	# col_id = []
 	feature_names = ['SP_1dayago', 'SP_2dayago', 'SP_3dayago', 'SP_4dayago', 'TP1dayago', 'TP2dayago', 'TP3dayago', 'TP4dayago', 
 		'FG1dayago', 'FG2dayago', 'FG3dayago', 'FG4dayago', 'FT1dayago', 'FT2dayago', 'FT3dayago', 'FT4dayago', 'TRB1dayago', 'TRB2dayago', 'TRB3dayago', 
 		'TRB4dayago', 'AST1dayago', 'AST2dayago', 'AST3dayago', 'AST4dayago', 'BLK1dayago', 'BLK2dayago', 'BLK3dayago', 'BLK4dayago', 'STL1dayago', 
@@ -215,11 +249,7 @@ def predict_today(player_dict):
 		'USGP4dayago', 'FTr1dayago', 'FTr2dayago', 'FTr3dayago', 'FTr4dayago', 'PM1dayago', 'PM2dayago', 'PM3dayago', 'PM4dayago', 'TSP1dayago', 'TSP2dayago', 
 		'TSP3dayago', 'TSP4dayago', 'PF1dayago', 'PF2dayago', 'PF3dayago', 'PF4dayago', 'ORtg1dayago', 'ORtg2dayago', 'ORtg3dayago', 'ORtg4dayago', 'DRtg1dayago', 
 		'DRtg2dayago', 'DRtg3dayago', 'DRtg4dayago', 'Elevation', 'OneisHome']
-	#for feat in feature_names:
-	#	col_id.append(np.where(lines.columns==feat)[0][0])
 	for player, feature_dict in player_dict.iteritems():
-		#player = line[np.where(lines.columns=='Player Name')[0][0]]
-		#features = line[col_id].reshape(1, -1)
 		features = np.zeros((1, len(feature_names)))
 		for i, feat in enumerate(feature_names):
 			features[0, i] = feature_dict[feat]
@@ -239,7 +269,11 @@ def predict_today(player_dict):
 			print player + ' is a ninja' 
 
 def read_to_dict():
-	'''add .. before score'''
+	'''
+	read elevation file and output elevation dictionary
+
+	@return elev: dictionary where key is 3 letter abbreviation for city and value is elevation of city
+	'''
 	Elevation = pd.read_csv('score-predictor/data/Elevation.csv', delimiter=' ', header=None)
 	elev = {k:int(v) for (k, v) in zip(Elevation[0], Elevation[3])}
 	return elev

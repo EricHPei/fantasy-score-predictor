@@ -7,9 +7,10 @@ import datetime
 
 def create_csvs(folder):
 	'''
-	INPUT: folder where all the data is
-	OUTPUT: None
 	goes through each folder. initiates file if it doesn't exist. if it does, append 
+
+	@param folder: folder where all the data is
+	@return: None
 	'''
 	path = folder+'/*/'
 	allFiles = glob.glob(path + "/*.csv")
@@ -30,9 +31,9 @@ def write_to_csv(in_file):
 
 def create_df():
 	'''
-	INPUT: folder where all the combined files are
-	OUTPUT: df
 	Goes through each file and adds it to the data frame
+
+	@return df: data frame of selected columns
 	'''
 	path = 'alldata/alldata'
 	allFiles = glob.glob(path + "/*.csv")
@@ -49,8 +50,10 @@ def create_df():
 
 def clean_df(df):
 	'''
-	INPUT: messy data frame
-	OUTPUT: data frame filling NA, without reserves, and columns typecasted correctly
+	Cleans the data frame created with the webscraper
+
+	@param df: messy data frame
+	@return df: data frame filling NA, without reserves, and columns typecasted correctly
 	'''
 	df = df[df['Player Name']!= 'Reserves']
 	df['MP'] = df['MP'].map(lambda x: '0:00' if ":" not in str(x) else str(x))
@@ -75,13 +78,15 @@ def clean_df(df):
 	return df
 
 def drop_zerominutes(df):
+	'''drops entries with 0 minutes'''
 	return df[df['MP'] != '0:00']
 
 def add_features(df):
 	'''
-	INPUT: raw df
-	OUTPUT: featured df
-	Goes through each file and adds it to the data frame
+	Goes through each file and converts minutes played(str) to second played(int)
+	
+	@param df: data frame with minutes played
+	@return df: data frame with seconds played
 	'''
 	ms_split = df['MP'].apply(lambda x: x.split(":"))
 	seconds_played = [int(row[0])*60 + int(row[1]) for row in ms_split]
@@ -92,10 +97,11 @@ def add_features(df):
 
 def make_averages(df, cutoff=0):
 	'''
-	original make_averages
-	make_averages_until
-	INPUT: messy data frame. use with X_Train. Input how many days you want to have the averages cutoff
-	OUTPUT: data frame with player averages
+	Create a data frame of player averages
+	
+	@param df: data frame of games and stats
+	@param cutoff: optional param, to decide the date you want your averages to be created until
+	@return Player_Averages: data frame with player averages
 	'''
 	today = datetime.date.today()
 	stop_average_date = today - datetime.timedelta(cutoff)
@@ -111,9 +117,10 @@ def make_averages(df, cutoff=0):
 
 def make_averages_per48(df):
 	'''
-	make_averages_until
-	INPUT: messy data frame. use with X_Train. Input how many days you want to have the averages cutoff
-	OUTPUT: data frame with player averages
+	Create a data frame of averages per 48 minutes
+
+	@param df: data frame of average stats
+	@return df.iloc[:,1:-1]: data frame with averages per 48
 	'''
 	for column in df.columns[1:8]:
 		df[column] = 48*60*df[column]/df['SP']
@@ -125,9 +132,11 @@ def make_averages_per48(df):
 
 def getdf_untildate(df, cutoff=0):
 	'''
-	INPUT: data frame
-	OUTPUT: data frame up until date
-	would be wise to match cutoff with make_averages cutoff to feed to clusters later
+	Return data frame with player name, seconds played, and 8 categories that we are predicting
+
+	@param df: data frame of summary
+	@param cutoff: optional number of days to cutoff where our df stops
+	@output df: data frame up until date
 	'''
 	today = datetime.date.today()
 	stop_average_date = today - datetime.timedelta(cutoff)
@@ -137,11 +146,11 @@ def getdf_untildate(df, cutoff=0):
 
 def get_date_matrix(df):
 	'''
-	INPUT: data frame
-	OUTPUT: matrix with player name, dates with lag and seconds played
-
 	This function and the next three are used to get the seconds played for previous days, indicating
 	representing amount of rest.
+	
+	@param df: data frame of games
+	@return date_matrix: matrix with player name, dates with lag and seconds played
 	'''	
 	df['DateM1'] = df['Date'] - pd.DateOffset(1)
 	df['DateM2'] = df['Date'] - pd.DateOffset(2)
@@ -152,6 +161,14 @@ def get_date_matrix(df):
 	return date_matrix
 
 def previous_sp(index, date_matrix, days=1):
+	'''
+	return previous days seconds played
+
+	@param index:
+	@param date_matrix: matrix with dates
+	@param days: 
+	@return oldsp: 
+	'''
 	player = date_matrix[index][0]
 	date = date_matrix[index][1+days]
 	for i in xrange(4):
@@ -164,6 +181,14 @@ def previous_sp(index, date_matrix, days=1):
 	return 0
 
 def make_lists(date_matrix, min_lag=1, max_lag=4):
+	'''
+	Generate lists of 
+
+	@param date_matrix: matrix of recent days
+	@param min_lag: min number of games back to get stats
+	@param max_lag: max number of games back to get stats
+	@return listofsp: list of nested lists where each nested list is a recent stat
+	'''
 	listofsp = [[] for i in xrange(min_lag, max_lag+1)]
 	for num, lst in enumerate(listofsp):
 		for i in xrange(len(date_matrix)):
@@ -171,11 +196,27 @@ def make_lists(date_matrix, min_lag=1, max_lag=4):
 	return listofsp
 
 def addcolumns(listofsp, df):
+	'''
+	Create new columns from the listofsp to add to the data frame
+
+	@param listofsp: list of delayed lags to add to data frame
+	@param df: frame to add the delayed lags tp
+	'''
 	for num, lst in enumerate(listofsp):
 		df['SP_'+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
 	return None
 
 def previous_stat(index, Player_Averages, matrix, column, lag=1):
+	'''
+
+
+	@param index: index of players
+	@param Player_Averages: averages of players to use
+	@param matrix: date_matrix
+	@param column: relevant column to add
+	@param lag: number of games to lag
+	@return statlag: lagged stat
+	'''
 	player = matrix[index][0]
 	stat = matrix[index][1]
 	index -= lag
@@ -201,18 +242,14 @@ def add_slag_columns(listoflist, df, name):
 		df[name+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
 	return None
 
-def player_average_asfeature(df, df2):
-	""" Add the players lifetime averages as a feature
+# def player_average_asfeature(df, df2):
+# 	""" Add the players lifetime averages as a feature
 
-	Parameters
-	----------
-	df: data frame with all information
-	df2: data frame of player averages
+# 	@param df: data frame with all information
+# 	@param df2: data frame of player averages
 
-	Returns
-	-------
-	dataframe with last X games as new feature
-	"""
-	return None 
+# 	@return dataframe with last X games as new feature
+# 	"""
+# 	return None 
 
 
