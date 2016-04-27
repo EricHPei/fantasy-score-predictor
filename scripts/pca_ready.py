@@ -9,6 +9,7 @@ def get_player_list(df):
 	Input: df
 	Output: get array of unique player names
 	'''
+	
 	return df['Player Name'].unique()
 
 def get_individual_df(name, df):
