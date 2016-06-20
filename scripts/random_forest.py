@@ -95,7 +95,7 @@ def make_8_models(df, y):
 	'''
 	model_dict = {}
 	for column in y.columns:
-		model_dict[column] = RandomForestRegressor()
+		model_dict[column] = RandomForestRegressor(n_estimators=100)
 		model_dict[column].fit(df, y[column])
 	return model_dict
 
