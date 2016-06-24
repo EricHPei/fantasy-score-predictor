@@ -208,7 +208,7 @@ def addcolumns(listofsp, df):
 
 def previous_stat(index, Player_Averages, matrix, column, lag=1):
 	'''
-
+	returns the lagged stat of a particular column
 
 	@param index: index of players
 	@param Player_Averages: averages of players to use
@@ -241,15 +241,4 @@ def add_slag_columns(listoflist, df, name):
 	for num, lst in enumerate(listoflist):
 		df[name+str(num+1)+'dayago'] = pd.Series(lst, index=df.index)
 	return None
-
-# def player_average_asfeature(df, df2):
-# 	""" Add the players lifetime averages as a feature
-
-# 	@param df: data frame with all information
-# 	@param df2: data frame of player averages
-
-# 	@return dataframe with last X games as new feature
-# 	"""
-# 	return None 
-
 
